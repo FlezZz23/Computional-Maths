@@ -46,27 +46,30 @@ a=0;
 b=1;
 po=log(x+1);
 po_fun=matlabFunction(po);
-N=2;
+N=5;
 disp("N="+num2str(N));
 m=1;
 p1=x^(2*N-1);
-for i=0:6
+for i=0:(2*N-1)
     mu(i+1)=integral(matlabFunction(po*x^i), a, b);
     disp(num2str(i)+" момент веса равен: "+num2str(mu(i+1)));
 end;
 fprintf('\n');
 
-disp("Узлы и коэффициенты КФНАСТ")
 for i=1:N
-    xk(i)=a+i*(b-a)/(N+1);
+    for j=1:N
+        A(i,j)=mu(i+j-1);
+    end;
+    B(i)=-mu(i+N);
 end;
-w=x^2+p*x+k;
-[p, k]=vpasolve([(subs(int(w*po),b)-subs(int(w*po),a))==0, (subs(int(w*po*x),b)-subs(int(w*po*x),a))==0],[p,k]);
-w=x^2+p*x+k;
+P=A\B';
+w=0;
+for i=1:N
+    w=w+P(i)*x^(i-1);
+end;
+w=w+x^N;
 xk=double(vpasolve(w==0,x));
-% for i=1:N
-%     w=w*(x-xk(i));
-% end;
+disp("Узлы и коэффициенты КФНАСТ")
 for i=1:N
     lkn=w/(x-xk(i))/subs(diff(w),xk(i));
     Ck(i)=integral(matlabFunction(po*lkn*lkn),a,b);
